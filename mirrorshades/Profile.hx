@@ -77,6 +77,14 @@ class Event{
      * The arguments are displayed in Trace Viewer when you view an event in the analysis section.
      */
     public var args: Dynamic;
+    /**
+     * Complete event duration. 
+     */
+    public var dur: UInt;
+    /**
+     * Instant event scope (g/p/t)
+     */
+    public var s: String;
     public inline function new(name, cat, ph, ts, pid, tid, ?args){
         this.name = name;
         this.cat = cat;
@@ -91,9 +99,17 @@ class Event{
     }
 }
 
+abstract Tick(UInt) from UInt to UInt{
+    public function new(){
+        this = Time.now();
+    }
+}
+
+
 class Profile {
+    #if profile
     static var events:Array<Event> = [];
-    static var sampling:Bool = false;
+    #end
 
     static inline function getCurrentThreadId():Int{
         #if cpp
@@ -103,28 +119,53 @@ class Profile {
         #end
     }
 
+    #if profile
     public static inline function sample(name:String, cat:String, ph:EventType, ts:UInt, pid:UInt, tid:UInt, ?args:Dynamic){
-        if(sampling)
-            events.push(new Event(name,cat,ph,ts,pid,tid,args));
+        var evt = new Event(name,cat,ph,ts,pid,tid,args);
+        events.push(evt);
+        return evt;
     }
+    #end
 
     public static inline function begin(name, cat){
+        #if profile
         sample(name, cat, EventType.DurationBegin, Time.now(), 0, getCurrentThreadId());
+        #end
     }
     public static inline function end(name, cat){
+        #if profile
         sample(name, cat, EventType.DurationEnd, Time.now(), 0, getCurrentThreadId());
+        #end
+    }
+    public static inline function complete(name, cat, duration){
+        #if profile
+        sample(name, cat, EventType.Complete, Time.now(), 0, getCurrentThreadId()).dur = duration;
+        #end
+    }
+    public static inline function instant(name, cat){
+        #if profile
+        sample(name, cat, EventType.Instant, Time.now(), 0, getCurrentThreadId()).s = 'g';
+        #end
     }
 
-
-    // Duration events
-    public static inline function start(){
-        sampling = true;
+    public static inline function tick():Tick{
+        #if profile
+        return new Tick();
+        #else
+        return 0;
+        #end
+    }
+    public static inline function tock(name, cat, tick:Tick){
+        #if profile
+        complete(name, cat, Time.now()-tick);
+        #end
     }
 
     // End
-    public static inline function stop(filePath:String){
+    public static inline function flush(filePath:String){
+        #if profile
         IO.dump(Json.stringify(events), filePath);
         events = [];
-        sampling = false;
+        #end
     }
 }
