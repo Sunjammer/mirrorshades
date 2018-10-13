@@ -148,16 +148,22 @@ class Profile {
         #end
     }
 
-    public static inline function tick():Tick{
+    public static inline function count(name,cat,values:Dynamic){
         #if profile
-        return new Tick();
+        sample(name, cat, EventType.Counter, Time.now(), 0, getCurrentThreadId(), values);
+        #end
+    }
+
+    public static inline function tick():UInt{
+        #if profile
+        return Time.now();
         #else
         return 0;
         #end
     }
-    public static inline function tock(name, cat, tick:Tick){
+    public static inline function tock(name, cat, startTime:UInt){
         #if profile
-        complete(name, cat, Time.now()-tick);
+        complete(name, cat, Time.now()-startTime);
         #end
     }
 
