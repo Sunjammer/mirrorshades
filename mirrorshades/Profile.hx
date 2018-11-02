@@ -99,12 +99,6 @@ class Event{
     }
 }
 
-abstract Tick(UInt) from UInt to UInt{
-    public function new(){
-        this = Time.now();
-    }
-}
-
 
 class Profile {
     #if profile
