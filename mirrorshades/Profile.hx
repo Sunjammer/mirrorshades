@@ -44,6 +44,9 @@ import mirrorshades.platform.*;
     var ClockSync = "c";
 }
 
+@:autoBuild(mirrorshades.macro.Build.profileAll())
+interface ProfileMethods{ }
+
 class Event{
     /**
      * The name of the event, as displayed in Trace Viewer
