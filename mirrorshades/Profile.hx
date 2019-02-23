@@ -1,7 +1,6 @@
 package mirrorshades;
 import haxe.ds.Vector;
 import haxe.Json;
-import cpp.vm.Thread;
 import mirrorshades.platform.*;
 
 /*
