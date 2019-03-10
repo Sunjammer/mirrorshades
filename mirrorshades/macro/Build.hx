@@ -14,7 +14,6 @@ class Build{
                 
                 switch(expr.expr){
                     case EBlock(exprs):
-                        trace("Profile: "+classname+": "+name+": "+exprs);
                         var newExprs = exprs.concat([]);
                         var key = classname+":"+name;
                         var begin = Context.parse("mirrorshades.Profile.begin('"+key+"', 'Performance')", Context.currentPos());
